@@ -15,19 +15,20 @@ class AdminController extends Controller
     // ------------------ Dashboard ------------------
     public function index()
     {
-        $totalRooms = Room::count();
-        $availableRooms = Room::where('is_available', true)->count();
-        $totalBookings = Booking::count();
-        $activeBookings = Booking::whereDate('check_out', '>=', Carbon::today())->count();
-        $totalUsers = User::count();
+        // Dashboard Blade will fetch stats via AJAX, so we don't need to pass variables here
+        return view('admin.dashboard');
+    }
 
-        return view('admin.dashboard', compact(
-            'totalRooms',
-            'availableRooms',
-            'totalBookings',
-            'activeBookings',
-            'totalUsers'
-        ));
+    // ------------------ Dashboard Stats for AJAX ------------------
+    public function dashboardStats()
+    {
+        return response()->json([
+            'totalRooms' => Room::count(),
+            'availableRooms' => Room::where('is_available', true)->count(),
+            'totalBookings' => Booking::count(),
+            'activeBookings' => Booking::whereDate('check_out', '>=', Carbon::today())->count(),
+            'totalUsers' => User::count(),
+        ]);
     }
 
     // ------------------ Rooms ------------------

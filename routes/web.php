@@ -32,6 +32,9 @@ Route::prefix('admin')->group(function () {
         Route::get('/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
         Route::post('/logout', [AdminLoginController::class, 'logout'])->name('admin.logout');
 
+        // ----------------- Dashboard Stats for AJAX -----------------
+        Route::get('/dashboard/stats', [AdminController::class, 'dashboardStats'])->name('admin.dashboard.stats');
+
         // ----------------- Admin Features -----------------
         Route::get('/features', [FeatureController::class, 'index'])->name('admin.features.index');
         Route::get('/features/reports', [FeatureController::class, 'reports'])->name('admin.features.reports');
