@@ -5,34 +5,45 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use App\Models\User;
 use App\Models\Room;
 use App\Models\Booking;
+use App\Mail\BookingConfirmed;
 use Carbon\Carbon;
 
 class UserController extends Controller
 {
-    // Show user dashboard
+    /**
+     * Show user dashboard with featured rooms
+     */
     public function index()
-{
-    // Fetch latest 3 available rooms for featured section
-    $rooms = Room::where('is_available', true)
-                 ->latest()
-                 ->take(3)
-                 ->get();
-
-    return view('user.home', compact('rooms'));
-}
-
-    // Show profile page
-    public function profile()
     {
-        return view('user.profile', ['user' => Auth::user()]);
+        $rooms = Room::where('is_available', true)
+                     ->latest()
+                     ->take(3)
+                     ->get();
+
+        return view('user.home', compact('rooms'));
     }
 
-    // Update profile
+    /**
+     * Show user profile page
+     */
+    public function profile()
+    {
+        /** @var User $user */
+        $user = Auth::user();
+
+        return view('user.profile', compact('user'));
+    }
+
+    /**
+     * Update user profile
+     */
     public function updateProfile(Request $request)
     {
-        /** @var \App\Models\User $user */
+        /** @var User $user */
         $user = Auth::user();
 
         $request->validate([
@@ -53,22 +64,23 @@ class UserController extends Controller
         return redirect()->route('user.profile')->with('success', 'Profile updated successfully!');
     }
 
-    // -------------------- Step 21.3 (Improved with active bookings) --------------------
-
-    // Show available rooms (filter out rooms that have active bookings)
+    /**
+     * Show available rooms (exclude rooms with active bookings)
+     */
     public function rooms()
     {
         $rooms = Room::whereDoesntHave('bookings', function ($query) {
-            $query->active(); // exclude rooms with active bookings
+            $query->active(); // Exclude rooms with active bookings
         })->get();
 
         return view('user.rooms', compact('rooms'));
     }
 
-    // Book a room
-    public function bookRoom(Request $request, $roomId)
+    /**
+     * Book a room and send confirmation email
+     */
+    public function bookRoom(Request $request, int $roomId)
     {
-
         $room = Room::findOrFail($roomId);
 
         $request->validate([
@@ -81,12 +93,11 @@ class UserController extends Controller
         $totalDays = $checkIn->diffInDays($checkOut);
         $totalPrice = $room->price * $totalDays;
 
-        // Make sure room is free in that period
         if (!$room->isAvailableForDates($checkIn, $checkOut)) {
             return back()->withErrors(['room' => 'This room is not available for the selected dates.']);
         }
 
-        Booking::create([
+        $booking = Booking::create([
             'user_id' => Auth::id(),
             'room_id' => $room->id,
             'check_in' => $checkIn->toDateString(),
@@ -94,10 +105,16 @@ class UserController extends Controller
             'total_price' => $totalPrice,
         ]);
 
-        return redirect()->route('user.bookings')->with('status', 'Room booked successfully!');
+        // Send booking confirmation email
+        Mail::to(Auth::user()->email)->send(new BookingConfirmed($booking));
+
+        return redirect()->route('user.bookings')
+            ->with('status', 'Room booked successfully! A confirmation email has been sent.');
     }
 
-    // Show all bookings of the logged-in user
+    /**
+     * Show all bookings of the logged-in user
+     */
     public function bookings()
     {
         $bookings = Booking::where('user_id', Auth::id())
@@ -107,18 +124,16 @@ class UserController extends Controller
         return view('user.bookings', compact('bookings'));
     }
 
-    // -------------------- Step 23: Cancel Booking --------------------
-
-    // Cancel a booking
-    public function cancelBooking($bookingId)
+    /**
+     * Cancel a booking
+     */
+    public function cancelBooking(int $bookingId)
     {
         $booking = Booking::where('id', $bookingId)
             ->where('user_id', Auth::id())
             ->firstOrFail();
 
-        // Optionally mark room available again (for backward compatibility)
         $booking->room->update(['is_available' => true]);
-
         $booking->delete();
 
         return redirect()->route('user.bookings')

@@ -90,7 +90,7 @@
     <header>
         <h1>@yield('header', 'Dashboard')</h1>
         <nav>
-            <a href="{{ route('dashboard') }}">Dashboard</a>
+            <a href="{{ route('dashboard') }}">Home</a>
             <a href="{{ route('user.rooms') }}">Rooms</a>
             <a href="{{ route('user.bookings') }}">My Bookings</a>
             <a href="{{ route('user.profile') }}">Profile</a>
