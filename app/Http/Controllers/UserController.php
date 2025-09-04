@@ -13,9 +13,15 @@ class UserController extends Controller
 {
     // Show user dashboard
     public function index()
-    {
-        return view('user.dashboard');
-    }
+{
+    // Fetch latest 3 available rooms for featured section
+    $rooms = Room::where('is_available', true)
+                 ->latest()
+                 ->take(3)
+                 ->get();
+
+    return view('user.home', compact('rooms'));
+}
 
     // Show profile page
     public function profile()
