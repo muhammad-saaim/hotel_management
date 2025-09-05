@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Room;
+use App\Jobs\ProcessNewRoom;
 
 class RoomController extends Controller
 {
@@ -37,8 +38,14 @@ class RoomController extends Controller
             'is_available' => 'required|boolean', // manual availability for maintenance
         ]);
 
-        Room::create($request->all());
-        return redirect()->route('admin.rooms.index')->with('status', 'Room added successfully!');
+        // Create the room
+        $room = Room::create($request->all());
+
+        // Dispatch queued job to notify all users
+        ProcessNewRoom::dispatch($room);
+
+        return redirect()->route('admin.rooms.index')
+                         ->with('status', 'Room added successfully! Users will be notified by email.');
     }
 
     // Show edit form
