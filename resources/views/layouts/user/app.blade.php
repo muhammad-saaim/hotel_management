@@ -35,7 +35,7 @@
         }
 
         .logo img {
-            height: 80px;
+            height: 60px;
         }
 
         .hotel-name {
