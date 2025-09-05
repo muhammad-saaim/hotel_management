@@ -13,62 +13,78 @@
         header {
             background: #007BFF;
             color: white;
-            padding: 15px 20px;
+            padding: 10px 20px;
             display: flex;
-            justify-content: space-between;
             align-items: center;
+            justify-content: space-between;
         }
 
-        header h1 {
-            margin: 0;
-            font-size: 20px;
+        .header-left,
+        .header-right {
+            display: flex;
+            align-items: center;
+            flex: 1; /* equal width for left & right */
+        }
+
+        .header-left {
+            justify-content: flex-start;
+        }
+
+        .header-right {
+            justify-content: flex-end;
+        }
+
+        .logo img {
+            height: 80px;
+        }
+
+        .hotel-name {
+            font-size: 22px;
+            font-weight: bold;
+            text-align: center;
+            flex: 0;
+        }
+
+        nav {
+            display: flex;
+            align-items: center;
+            gap: 20px; /* ✅ space between links */
         }
 
         nav a {
-            margin-right: 15px;
             text-decoration: none;
             color: white;
-            font-weight: bold;
+            font-weight: 500;
+            transition: opacity 0.2s;
         }
 
         nav a:hover {
-            text-decoration: underline;
+            opacity: 0.8;
         }
 
-        .logout-btn {
-            display: inline;
+        nav form {
+            display: inline-flex;
+            margin: 0;
+            padding: 0;
+        }
+
+        .logout-btn button {
+            background: #e3342f;
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            color: white;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background 0.2s ease-in-out;
+        }
+
+        .logout-btn button:hover {
+            background: #c82333;
         }
 
         main {
             padding: 20px;
-        }
-
-        button {
-            padding: 8px 15px;
-            background: #e3342f;
-            color: white;
-            border: none;
-            cursor: pointer;
-            border-radius: 3px;
-            font-weight: bold;
-        }
-
-        button:hover {
-            background: #cc1f1a;
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        input[type="text"],
-        input[type="email"],
-        input[type="password"] {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #ccc;
-            border-radius: 3px;
-            box-sizing: border-box;
         }
 
         .success-message {
@@ -88,20 +104,35 @@
 <body>
 
     <header>
-        <h1>@yield('header', 'Dashboard')</h1>
-        <nav>
-            <a href="{{ route('dashboard') }}">Home</a>
-            <a href="{{ route('user.rooms') }}">Rooms</a>
-            <a href="{{ route('user.bookings') }}">My Bookings</a>
-            <a href="{{ route('user.profile') }}">Profile</a>
+        {{-- Left: Logo --}}
+        <div class="header-left">
+            <div class="logo">
+                <img src="{{ asset('images/logo.png') }}" alt="Hotel Logo">
+            </div>
+        </div>
 
+        {{-- Center: Hotel Name --}}
+        <div class="hotel-name">
+            <a href="{{ route('dashboard') }}" style="color:white; text-decoration:none;">
+                Mariott Hotel
+            </a>
+        </div>
 
-            <form method="POST" action="{{ route('logout') }}" class="logout-btn">
-                @csrf
-                <button type="submit">Logout</button>
-            </form>
-        </nav>
+        {{-- Right: Nav --}}
+        <div class="header-right">
+            <nav>
+                <a href="{{ route('dashboard') }}">Home</a>
+                <a href="{{ route('user.rooms') }}">Rooms</a>
+                <a href="{{ route('user.bookings') }}">My Bookings</a>
+                <a href="{{ route('user.profile') }}">Profile</a>
+                <form method="POST" action="{{ route('logout') }}" class="logout-btn">
+                    @csrf
+                    <button type="submit">Logout</button>
+                </form>
+            </nav>
+        </div>
     </header>
+
     <main>
         @if(session('status'))
             <div class="success-message">

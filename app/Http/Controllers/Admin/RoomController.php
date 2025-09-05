@@ -12,7 +12,6 @@ class RoomController extends Controller
     // List all rooms
     public function index()
     {
-        // Add active booking count for today
         $rooms = Room::withCount(['bookings as active_bookings_count' => function($query) {
             $query->whereDate('check_in', '<=', now())
                   ->whereDate('check_out', '>=', now());
@@ -35,11 +34,19 @@ class RoomController extends Controller
             'type' => 'required|string|max:255',
             'price' => 'required|numeric|min:0',
             'capacity' => 'required|integer|min:1',
-            'is_available' => 'required|boolean', // manual availability for maintenance
+            'is_available' => 'required|boolean',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048', // validate image
         ]);
 
+        $roomData = $request->all();
+
+        // Handle image upload
+        if ($request->hasFile('image')) {
+            $roomData['image'] = $request->file('image')->store('rooms', 'public');
+        }
+
         // Create the room
-        $room = Room::create($request->all());
+        $room = Room::create($roomData);
 
         // Dispatch queued job to notify all users
         ProcessNewRoom::dispatch($room);
@@ -63,9 +70,18 @@ class RoomController extends Controller
             'price' => 'required|numeric|min:0',
             'capacity' => 'required|integer|min:1',
             'is_available' => 'required|boolean',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048', // optional image update
         ]);
 
-        $room->update($request->all());
+        $roomData = $request->all();
+
+        // Handle image upload if present
+        if ($request->hasFile('image')) {
+            $roomData['image'] = $request->file('image')->store('rooms', 'public');
+        }
+
+        $room->update($roomData);
+
         return redirect()->route('admin.rooms.index')->with('status', 'Room updated successfully!');
     }
 

@@ -15,7 +15,7 @@
         </div>
     @endif
 
-    <form method="POST" action="{{ route('admin.rooms.store') }}">
+    <form method="POST" action="{{ route('admin.rooms.store') }}" enctype="multipart/form-data">
         @csrf
         <div style="margin-bottom: 15px;">
             <label for="name" style="display:block; font-weight: bold; margin-bottom: 5px;">Room Name:</label>
@@ -39,6 +39,12 @@
             <label for="capacity" style="display:block; font-weight: bold; margin-bottom: 5px;">Capacity:</label>
             <input type="number" id="capacity" name="capacity" value="{{ old('capacity') }}" required
                 style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+        </div>
+
+        <div style="margin-bottom: 15px;">
+            <label for="image" style="display:block; font-weight: bold; margin-bottom: 5px;">Room Image (optional):</label>
+            <input type="file" id="image" name="image" accept="image/*"
+                style="width: 100%; padding: 5px; border: 1px solid #ccc; border-radius: 4px;">
         </div>
 
         <div style="margin-bottom: 20px;">
