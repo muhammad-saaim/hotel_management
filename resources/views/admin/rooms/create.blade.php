@@ -32,6 +32,10 @@
         <label>Capacity:</label>
         <input type="number" name="capacity" value="{{ old('capacity') }}" required>
     </div>
+    <div>
+        <label>Is Available:</label>
+        <input type="checkbox" name="is_available" value="1" checked>
+    </div>
     <button type="submit">Add Room</button>
 </form>
 @endsection
